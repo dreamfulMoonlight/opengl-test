@@ -39,13 +39,10 @@ static unsigned int CreateShader(const std::string& vertexShader,const std::stri
 
 	glLinkProgram(program);
 	glValidateProgram(program);
-	
-	glUseProgram(program);
 
 	glDeleteShader(vs);
 	glDeleteShader(fs);
 
-	glUseProgram(program);
 	return program;
 }
 int main(int argc, char **argv)
@@ -68,19 +65,47 @@ int main(int argc, char **argv)
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
 
+	//设置帧率
+	glfwSwapInterval(1);
 	//初始化glew库,在crreate context之后
 	if (glewInit() != GLEW_OK)
 	{
 		exit(EXIT_FAILURE);
 	}
 
-	float position[6] = { -0.5f,-0.5f,0.0f,0.5f,0.5f,-0.5f };
+	float position[6] = { 
+		-0.5f,-0.5f, //0
+		0.0f,0.5f,   //1
+		0.5f,-0.5f //2 
+	};
+
+	float rect_position[] = {
+		-0.5f,-0.5f, //0
+		0.5f,-0.5f, //1 
+		0.5f,0.5f,   //2
+
+		0.5f,0.5f,   //2
+		-0.5f,0.5f, //3
+		-0.5f,-0.5f, //0
+	};
+
+	unsigned int indices[] = {
+		0,1,2,
+		2,3,0
+	};
+
+
 	unsigned int buffer;
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), position, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 6 *2* sizeof(float), rect_position, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof(float) * 2, 0);
 	glEnableVertexAttribArray(0);  
+
+		/*unsigned int ibo;
+		glGenBuffers(1, &ibo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);*/
 
 	std::string vertexShader = 
 		"#version 330 core\n"
@@ -92,24 +117,26 @@ int main(int argc, char **argv)
 		" gl_Position= position;\n"
 		"}\n";
 
-	std::string fragmentShader =
+	std::string fragmentShader = 
 		"#version 330 core\n"
 		"\n"
 		"out vec4 color;\n"
 		"\n"
-		"uniform vec4 u_Color;"
-		"/n"
+		"uniform vec4 ourColor;\n"
+		"\n"
 		"void main()\n"
 		"{\n"
-		"  color = vec4(0.5f, 0.0f, 0.0f, 1.0f);\n"
+		"  color = ourColor;\n"
 		"}\n";
 
-	unsigned int shader = CreateShader(vertexShader, fragmentShader);
-	
+	unsigned int shader = CreateShader(vertexShader,fragmentShader);
+	glUseProgram(shader);
 
-	int location = glGetUniformLocation(shader, "u_Color");
-	glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f);
+	int location = glGetUniformLocation(shader, "ourColor");
+	//glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f);
 	/* Loop until the user closes the window */
+	float r = 0.0f;
+	float increment = 0.05f;
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -131,9 +158,19 @@ int main(int argc, char **argv)
 		glEnd();
 		*/
 
-		/*现代opengl写法*/
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		if (r > 1.0f)
+			increment = -0.05f;
+		else if(r<0.0f)
+			increment = 0.05f;
 
+		r += increment;
+
+		glUniform4f(location, r, 0.3f, 0.8f, 1.0f);
+		/*现代opengl写法*/
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		//
+		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 
