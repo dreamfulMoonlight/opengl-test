@@ -54,9 +54,9 @@ int main(int argc, char **argv)
 	if (!glfwInit())
 		return -1;
 	
-	/*glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);*/
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	/* Create a windowed mode window and its OpenGL context */
 	window = glfwCreateWindow(640, 480, "My GLFW Window", NULL, NULL);
 	if (!window)
@@ -104,9 +104,9 @@ int main(int argc, char **argv)
 		2,3,0
 	};
 
-	/*unsigned int vao;
+	unsigned int vao;
 	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);*/
+	glBindVertexArray(vao);
 
 	unsigned int buffer;
 	glGenBuffers(1, &buffer);
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
 	float r = 0.0f;
 	float increment = 0.05f;
 
-	//glBindVertexArray(0);
+	glBindVertexArray(0);
 	glUseProgram(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -185,9 +185,12 @@ int main(int argc, char **argv)
 		glUseProgram(shader);
 		glUniform4f(location, r, 0.3f, 0.8f, 1.0f);
 
+		/*no need to bind buffer
 		glBindBuffer(GL_ARRAY_BUFFER, buffer);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof(float) * 2, 0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof(float) * 2, 0);*/
+
+		glBindVertexArray(vao);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 		/*现代opengl写法*/
 		//glDrawArrays(GL_TRIANGLES, 0, 6);
