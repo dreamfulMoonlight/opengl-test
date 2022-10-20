@@ -5,9 +5,7 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include"render.h"
-#include<fstream>
-#include<string>
-#include<sstream>
+#include"shader.h"
 #include <direct.h>
 #include<limits.h>
 
@@ -15,72 +13,6 @@
 #include"VertexBuffer.h"
 #include"IndexBuffer.h"
 #include"VertexArray.h"
-
-static unsigned int compileShader(const std::string&source, unsigned int type)
-{
-	unsigned int id = glCreateShader(type);  
-	const char* src = source.c_str();
-	glShaderSource(id, 1, &src, nullptr);	
-	glCompileShader(id);
-
-	return id;
-
-}
-
-struct ShaderProgramSource
-{
-	std::string VertexSource;
-	std::string FragmentSource;
-};
-static ShaderProgramSource ParasseShader(const std::string&file_path) {
-	enum class ShaderType
-	{
-		NONE=-1,VERTEX=0,FRAGMENT=1
-	};
-	std::ifstream stream(file_path);
-	std::string line;
-	std::stringstream ss[2];
-	ShaderType type = ShaderType::NONE;
-
-	while (getline(stream,line))
-	{
-		if (line.find("#shader") != std::string::npos)
-		{
-			if (line.find("vertex") != std::string::npos)
-			{
-				type = ShaderType::VERTEX;
-			}
-			else if (line.find("fragment") != std::string::npos)
-			{
-				type = ShaderType::FRAGMENT;
-			}
-		}
-		else
-		{
-			ss[(int)type] << line << "\n";
-		}
-	}
-	return { ss[0].str(),ss[1].str() };
-}
-
-static unsigned int CreateShader(const std::string& vertexShader, const std::string &fragmentShader)
-{
-	unsigned int program = glCreateProgram(); 
-	unsigned int vs = compileShader(vertexShader, GL_VERTEX_SHADER);
-	unsigned int fs = compileShader(fragmentShader, GL_FRAGMENT_SHADER);
-
-	glAttachShader(program, vs);
-	glAttachShader(program, fs);
-	glLinkProgram(program);
-	glValidateProgram(program);
-
-	glUseProgram(program);
-
-	glDeleteShader(vs);
-	glDeleteShader(fs);
-
-	return program;
-}
 
 
 int main(int argc, char **argv)
@@ -133,44 +65,16 @@ int main(int argc, char **argv)
 
 	IndexBuffer ib(indices, 6);
 	
+	float r = 0.0f;
+	float increment = 0.05f;
+	Shader shader("D:/test/opengl-test/src/basic.shader");
+	shader.Bind();
+	shader.SetUniform4f("ourColor", r, 0.3f, 0.8f, 1.0f);
 
-	std::string vertexShader =
-		"#version 330 core\n"
-		"\n"
-		"layout(location = 0) in vec4 position;"
-		"\n"
-		"void main()\n"
-		"{\n"
-		" gl_Position= position;\n"
-		"}\n";
-
-	std::string fragmentShader =
-		"#version 330 core\n"
-		"\n"
-		"out vec4 color;\n"
-		"\n"
-		"uniform vec4 ourColor;\n"
-		"\n"
-		"void main()\n"
-		"{\n"
-		"  color = ourColor;\n"
-		"}\n";
-
-	
-		//unsigned int shader = CreateShader(vertexShader, fragmentShader);
-	char buff[250];
-	_getcwd(buff, 250);
-	std::string current_working_directory(buff);
-		ShaderProgramSource source = ParasseShader("D:/test/opengl-test/src/basic.shader");
-		unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
-		int location = glGetUniformLocation(shader, "ourColor");
-		float r = 0.0f;
-		float increment = 0.05f;
-
-		glBindVertexArray(0);
-		glUseProgram(0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	va.Unbind();
+	shader.Unbind();
+	vb.Unbind();
+	ib.Unbind();
 
 		while (!glfwWindowShouldClose(window))
 		{
@@ -187,8 +91,9 @@ int main(int argc, char **argv)
 
 			r += increment;
 
-			glUseProgram(shader);
-			glUniform4f(location, r, 0.3f, 0.8f, 1.0f);
+			shader.Bind();
+			shader.SetUniform4f("ourColor", r, 0.3f, 0.8f, 1.0f);
+			
 
 
 			va.Bind();
