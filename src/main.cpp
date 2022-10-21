@@ -13,7 +13,7 @@
 #include"VertexBuffer.h"
 #include"IndexBuffer.h"
 #include"VertexArray.h"
-
+#include"VertexBufferLayout.h"
 
 int main(int argc, char **argv)
 {
@@ -76,13 +76,12 @@ int main(int argc, char **argv)
 	vb.Unbind();
 	ib.Unbind();
 
+	render render_obj;
 		while (!glfwWindowShouldClose(window))
 		{
 			glfwPollEvents();
 
-
-			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
+			render_obj.Clear();
 
 			if (r > 1.0f)
 				increment = -0.05f;
@@ -96,10 +95,7 @@ int main(int argc, char **argv)
 			
 
 
-			va.Bind();
-			ib.Bind();
-
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+			render_obj.Draw(va, ib, shader);
 
 			glfwSwapBuffers(window);
 		}
