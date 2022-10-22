@@ -14,6 +14,7 @@
 #include"IndexBuffer.h"
 #include"VertexArray.h"
 #include"VertexBufferLayout.h"
+#include"Texture.h"
 
 int main(int argc, char **argv)
 {
@@ -43,10 +44,10 @@ int main(int argc, char **argv)
 
 
 	float indices_position[] = {
-	-0.5f,-0.5f, //0
-	0.5f,-0.5f, //1 
-	0.5f,0.5f,   //2
-	-0.5f,0.5f, //3
+	-0.5f,-0.5f, 0.0f,0.0f,//0
+	0.5f,-0.5f, 1.0f,0.0f,//1 
+	0.5f,0.5f,  1.0f,1.0f,//2
+	-0.5f,0.5f, 0.0f,1.0f//3
 	};
 
 	unsigned int indices[] = {
@@ -57,9 +58,10 @@ int main(int argc, char **argv)
 	
 	{
     VertexArray va;
-	VertexBuffer vb(indices_position, 4 * 2 * sizeof(float));
+	VertexBuffer vb(indices_position, 4 * 4 * sizeof(float));
 	  
 	VertexBufferLayout layout;
+	layout.Push<float>(2);
 	layout.Push<float>(2);
 	va.AddBuffer(vb, layout);
 
@@ -70,6 +72,10 @@ int main(int argc, char **argv)
 	Shader shader("D:/test/opengl-test/src/basic.shader");
 	shader.Bind();
 	shader.SetUniform4f("ourColor", r, 0.3f, 0.8f, 1.0f);
+
+	Texture texture("D:/test/opengl-test/src/image_1.jpg");
+	texture.Bind();
+	shader.SetUniform1i("u_Texture", 0);
 
 	va.Unbind();
 	shader.Unbind();
